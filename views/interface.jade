@@ -1,0 +1,36 @@
+doctype
+html
+  head
+    title Skippy Control
+    link(rel='stylesheet', href='/css/interface.css')
+    link(rel='stylesheet', href='/css/flat-ui.css')
+    script(src="/js/jquery-2.1.1.min.js")
+    script(src="/js/interface.js")
+  body
+    .mainContainer
+      .title Skippy Control
+      .buttonBlock
+        button.btn.btn-block.btn-lg.btn-primary#forward() Forward
+      .buttonBlock
+        button.btn.btn-block.btn-lg.btn-primary#left Left
+        |&nbsp;
+        button.btn.btn-block.btn-lg.btn-primary#right Right
+      .buttonBlock
+        button.btn.btn-block.btn-lg.btn-primary#backward Backward
+      .buttonBlock
+        button.btn.btn-block.btn-lg.btn-danger#stop Stop
+      .buttonBlock
+        div.display#distance Distance:
+      .buttonBlock
+        div.status#wifiStatus Offline
+      script(src="/socket.io/socket.io.js")
+      script(src="http://code.jquery.com/jquery-1.11.1.js")
+      script. 
+        $(document).ready(function(){
+            var socket = io();
+            $('button').click(function(){
+                var cmdname = $(this).attr('id');
+                socket.emit(cmdname, cmdname);
+                return false;
+            });
+        });
