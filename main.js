@@ -3,6 +3,9 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app)
 var io = require('socket.io')(http);
+var skippy_cls = require('./skippy');
+console.log("Initilizing Skippy.");
+var skippy = new skippy_cls();
 
 // Define port
 var port = 3000;
@@ -23,24 +26,30 @@ app.get('/', function(req, res){
 io.on('connection', function(socket){
     console.log("A user is connected");
     socket.on('forward', function(){
-        console.log("CMD: Forward")
+        console.log("CMD: Forward");
+        skippy.goForward(50);
     });
     socket.on('left', function(){
-        console.log("CMD: Left")
+        console.log("CMD: Left");
+        skippy.turnLeft();
     });
     socket.on('right', function(){
-        console.log("CMD: Right")
+        console.log("CMD: Right");
+        skippy.turnRight();
+
     });
     socket.on('backward', function(){
-        console.log("CMD: Backward")
+        console.log("CMD: Backward");
+        skippy.goBackward(50);
     });
     socket.on('stop', function(){
-        console.log("CMD: Stop")
+        console.log("CMD: Stop");
+        skippy.stop();
     });
-    
+
 });
 
 // Start server
 http.listen(port, function(){
-   console.log("Listening on port " + port); 
+   console.log("Listening on port " + port);
 });

@@ -10,6 +10,16 @@ var mraa = require('mraa');
 /* Distance sensors */
 var IRProximity = require('jsupm_gp2y0a')
 
+/*
+DFRobot 4WD Wheel radius -- Distance calcualtion
+http://www.dfrobot.com/index.php?route=product/product&path=66_46_101&product_id=352#.Vcp8Tbe06Rs
+Diameter: 65mm
+radius : 32.5mm
+circumference: 204.203522 mm
+Encoder : 10 counts p/turn
+1 count = 20.42mm
+*/
+
 
 module.exports = function (){
   // Wheel Encoders
@@ -30,7 +40,7 @@ module.exports = function (){
 
 
 
-  this.speed = 50; //default speed
+  this.SPEED = 50; //default speed
 
   // Instantiate Motorsheild
   var ms = new ms_lib.AdafruitMS1438(I2CBus, I2CAddr);
@@ -41,16 +51,20 @@ module.exports = function (){
     "m4": ms_lib.AdafruitMS1438.MOTOR_M4
   };
 
+
+
   /* Function to stop skippy */
   this.stop = function(){
     for (m in motors){
-      ms.enableMotor(motors[m]);
+    	console.log("Disabling motors: " + motors[m])
+      ms.disableMotor(motors[m]);
     }
   };
   /* Function to stop skippy */
   this.start = function(){
     for (m in motors){
-      ms.disableMotor(motors[m]);
+      console.log("Enabling motors: " + motors[m]);
+      ms.enableMotor(motors[m]);
     }
   };
   /* Function to go forward */
@@ -67,6 +81,7 @@ module.exports = function (){
       ms.setMotorDirection(motors[m], MotorDirCCW);
     }
     this.start();
+    console.log("Skippy going back");
   };
 
   this.goForward = function(speed){
@@ -76,26 +91,29 @@ module.exports = function (){
       ms.setMotorDirection(motors[m], MotorDirCW);
     }
     this.start();
+    console.log("Skippy going forward");
   };
 
   this.turnLeft = function(){
-    stop();
-    this.setSpeed(speed);
+    this.stop();
+    this.setSpeed(20);
     ms.setMotorDirection(motors.m1, MotorDirCCW);
-    ms.ms.setMotorDirection(motors.m2, MotorDirCCW);
+    ms.setMotorDirection(motors.m2, MotorDirCCW);
     ms.setMotorDirection(motors.m3, MotorDirCW);
-    ms.ms.setMotorDirection(motors.m4, MotorDirCW);
+    ms.setMotorDirection(motors.m4, MotorDirCW);
     this.start();
+    console.log("Skippy turning Left");
   };
 
   this.turnRight = function(){
-    stop();
-    this.setSpeed(speed);
+    this.stop();
+    this.setSpeed(20);
     ms.setMotorDirection(motors.m1, MotorDirCW);
-    ms.ms.setMotorDirection(motors.m2, MotorDirCW);
+    ms.setMotorDirection(motors.m2, MotorDirCW);
     ms.setMotorDirection(motors.m3, MotorDirCCW);
-    ms.ms.setMotorDirection(motors.m4, MotorDirCCW);
+    ms.setMotorDirection(motors.m4, MotorDirCCW);
     this.start();
+    console.log("Skippy turning Right");
   };
 
   /* ISR functions to increment count of voltage increse on wheen encoders */
