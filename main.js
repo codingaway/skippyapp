@@ -27,7 +27,7 @@ io.on('connection', function(socket){
     console.log("A user is connected");
     socket.on('forward', function(){
         console.log("CMD: Forward");
-        skippy.goForward(50);
+        skippy.goForward();
     });
     socket.on('left', function(){
         console.log("CMD: Left");
@@ -40,7 +40,7 @@ io.on('connection', function(socket){
     });
     socket.on('backward', function(){
         console.log("CMD: Backward");
-        skippy.goBackward(50);
+        skippy.goBackward();
     });
     socket.on('stop', function(){
         console.log("CMD: Stop");

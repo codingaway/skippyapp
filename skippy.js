@@ -40,10 +40,12 @@ module.exports = function (){
 
 
 
-  this.SPEED = 50; //default speed
 
   // Instantiate Motorsheild
   var ms = new ms_lib.AdafruitMS1438(I2CBus, I2CAddr);
+  ms.setPWMPeriod(1000); // Set PWM period to 1KHz, Max 1.6KHz
+  this.currentSpeed = 0;
+  var MAX_SPEED = 70; // Speed range (0, 100)
   var motors = {
     "m1": ms_lib.AdafruitMS1438.MOTOR_M1,
     "m2": ms_lib.AdafruitMS1438.MOTOR_M2,
@@ -51,68 +53,100 @@ module.exports = function (){
     "m4": ms_lib.AdafruitMS1438.MOTOR_M4
   };
 
-
-
+  /* Function to set motor speed */
+  var setSpeed = function(speed){
+    for (m in motors){
+      ms.setMotorSpeed(motors[m], speed);
+    }
+    this.currentSpeed = speed;
+  };    
   /* Function to stop skippy */
   this.stop = function(){
+    for(var i = this.currentSpeed; i > 0; i -= 10)
+    {
+      setTimeout(function()
+      {
+        setSpeed(i);
+      }, 250);
+    }
+
+
+    if (this.currentSpeed > 0)
+    {
+      setSpeed(0); // Ensure speed set to 0
+    }
+
     for (m in motors){
     	console.log("Disabling motors: " + motors[m])
       ms.disableMotor(motors[m]);
     }
   };
-  /* Function to stop skippy */
+  
+  this.stop();
+
+  /* Function to enable motors */
   this.start = function(){
     for (m in motors){
       console.log("Enabling motors: " + motors[m]);
       ms.enableMotor(motors[m]);
     }
   };
-  /* Function to go forward */
-  this.setSpeed = function(speed){
-    for (m in motors){
-      ms.setMotorSpeed(motors[m], speed);
-    }
-  };
+
   /* Function to go backward */
-  this.goBackward = function(speed){
+  this.goBackward = function(){
     this.stop();
-    this.setSpeed(speed);
     for (m in motors){
       ms.setMotorDirection(motors[m], MotorDirCCW);
     }
+
     this.start();
     console.log("Skippy going back");
+    for(var i = this.currentSpeed; i < MAX_SPEED; i += 2)
+    {
+      setTimeout(function()
+      {
+        setSpeed(i);
+      }, 500);
+    }
   };
 
-  this.goForward = function(speed){
+  this.goForward = function(){
     this.stop();
-    this.setSpeed(speed);
     for (m in motors){
       ms.setMotorDirection(motors[m], MotorDirCW);
     }
+
     this.start();
     console.log("Skippy going forward");
+    // Increase speed incrementally
+  	for(var i = this.currentSpeed; i < MAX_SPEED; i += 2)
+    {
+      setTimeout(function()
+      {
+        setSpeed(i);
+      }, 500);
+    }
   };
 
   this.turnLeft = function(){
     this.stop();
-    this.setSpeed(20);
+    setSpeed(20);
+    this.start();
     ms.setMotorDirection(motors.m1, MotorDirCCW);
     ms.setMotorDirection(motors.m2, MotorDirCCW);
     ms.setMotorDirection(motors.m3, MotorDirCW);
     ms.setMotorDirection(motors.m4, MotorDirCW);
-    this.start();
     console.log("Skippy turning Left");
   };
 
   this.turnRight = function(){
     this.stop();
-    this.setSpeed(20);
+    setSpeed(20);
+    this.start();
     ms.setMotorDirection(motors.m1, MotorDirCW);
     ms.setMotorDirection(motors.m2, MotorDirCW);
     ms.setMotorDirection(motors.m3, MotorDirCCW);
     ms.setMotorDirection(motors.m4, MotorDirCCW);
-    this.start();
     console.log("Skippy turning Right");
   };
 
@@ -120,6 +154,7 @@ module.exports = function (){
   this.startRotationCount = function(){
     this.countLeft = 0;
     this.countRight = 0;
+
     this.leftEnc.isr(mraa.EDGE_RISING, function(){
       this.countLeft++;
     });
@@ -128,6 +163,7 @@ module.exports = function (){
       this.countRight++;
     });
   };
+
   // Stop wheel rotation count
   this.stopRotationCount = function(){
     this.leftEnc.isrExit();
