@@ -1,0 +1,95 @@
+doctype
+html
+  head
+    title Skippy Control
+    link(rel='stylesheet', href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css")
+    link(rel='stylesheet', href='/css/flat-ui.css')
+    link(rel='stylesheet', href='/css/interface.css')
+    script(src="/js/jquery-2.1.1.min.js")
+    script(src="/js/interface.js")
+  body
+    div.container
+        div.row
+            .title Skippy Dashboard
+            div.col-sm-4
+                table
+                    tr
+                        td.text-right
+                            h6 Distance &nbsp;
+                                span.glyphicon.glyphicon-time
+                        td.text-left
+                            span#distance
+                    tr
+                        td.text-right
+                            h6 Current Speed &nbsp;
+                                span.glyphicon.glyphicon-dashboard
+                        td.text-left
+                            span#speed
+                    tr
+                        td.text-right
+                            h6 Warning &nbsp;
+                                span.glyphicon.glyphicon-warning-sign
+                        td.text-left
+                            span#warning
+            div.col-sm-4
+                .mainContainer
+                  .buttonBlock
+                    button.btn.btn-lg.btn-primary#forward
+                        span.glyphicon.glyphicon-arrow-up
+                  .buttonBlock
+                    button.btn.btn-lg.btn-primary#left
+                        span.glyphicon.glyphicon-arrow-left
+                    |&nbsp;
+                    button.btn.btn-lg.btn-primary#right
+                        span.glyphicon.glyphicon-arrow-right
+                  .buttonBlock
+                    button.btn.btn-lg.btn-primary#backward
+                        span.glyphicon.glyphicon-arrow-down
+                  .buttonBlock
+                    button.btn.btn-lg.btn-danger#stop
+                        span.glyphicon.glyphicon-off
+                        |&nbsp; Stop
+                  .buttonBlock
+                    button.btn.btn-lg.btn-info#demo Run Demo
+                    |&nbsp;
+                    button.btn.btn-lg.btn-info#auto Auto mode
+            div.col-sm-4
+                div.row
+                    div.col-sm-12.well
+                        fieldset
+                            legend
+                                Route Programming &nbsp;
+                                span.glyphicon.glyphicon-random
+                                br
+                                br
+                                label Command
+                                select(name="Command")
+                                    option(value="forward") Forward
+                                    option(value="backward") Backward
+                                    option(value="left") Turn Left
+                                    option(value="right") Turn right
+                                |&nbsp;
+                                label#param Parameters
+                                |&nbsp;
+                                input(type="text")
+                                |&nbsp;
+                                button.btn.btn-xs.btn-info#add Add
+                                br
+                                button.btn.btn-sm.btn-info#add Run
+                                |&nbsp;
+                                button.btn.btn-sm.btn-default#add Clear
+                div.row
+                    div.col-sm-12.well
+                        ul
+                            li Go forward: 20
+                            li Turn right: 10
+      script(src="/socket.io/socket.io.js")
+      script.
+        $(document).ready(function(){
+            var socket = io();
+            $('button').click(function(){
+                var cmdname = $(this).attr('id');
+                socket.emit(cmdname, cmdname);
+                return false;
+            });
+        });

@@ -14,10 +14,10 @@ var IRProximity = require('jsupm_gp2y0a')
 DFRobot 4WD Wheel radius -- Distance calcualtion
 http://www.dfrobot.com/index.php?route=product/product&path=66_46_101&product_id=352#.Vcp8Tbe06Rs
 Diameter: 65mm
-radius : 32.5mm
-circumference: 204.203522 mm
+radius : 39mm
+circumference: 245.044 mm
 Encoder : 10 counts p/turn
-1 count = 20.42mm
+1 count = 24.5044 mm
 */
 
 
@@ -35,7 +35,7 @@ module.exports = function (){
   this.d2 = new IRProximity.GP2Y0A(3);
   this.d3 = new IRProximity.GP2Y0A(4);
   this.d4 = new IRProximity.GP2Y0A(5);
-  var AREF = 5.0; // Analog reference voltage; depends on board aref jumper settings
+  var AREF = 5.0; // Analog reference voltage; depends on boards aref jumper settings
   var SAMPLES_PER_QUERY = 20; // Sample per query for Analog read
 
 
@@ -45,7 +45,7 @@ module.exports = function (){
   var ms = new ms_lib.AdafruitMS1438(I2CBus, I2CAddr);
   ms.setPWMPeriod(1000); // Set PWM period to 1KHz, Max 1.6KHz
   this.currentSpeed = 0;
-  var MAX_SPEED = 70; // Speed range (0, 100)
+  var MAX_SPEED = 30; // Speed range (0, 100)
   var motors = {
     "m1": ms_lib.AdafruitMS1438.MOTOR_M1,
     "m2": ms_lib.AdafruitMS1438.MOTOR_M2,
@@ -62,7 +62,7 @@ module.exports = function (){
   };    
   /* Function to stop skippy */
   this.stop = function(){
-    for(var i = this.currentSpeed; i > 0; i -= 10)
+    for(var i = this.currentSpeed; i > 0; i -= 2)
     {
       setTimeout(function()
       {
@@ -82,7 +82,7 @@ module.exports = function (){
     }
   };
   
-  this.stop();
+  this.stop(); // Disable motors when initialize MS to be safe
 
   /* Function to enable motors */
   this.start = function(){
@@ -90,6 +90,7 @@ module.exports = function (){
       console.log("Enabling motors: " + motors[m]);
       ms.enableMotor(motors[m]);
     }
+    this.stopRotationCount();
   };
 
   /* Function to go backward */
@@ -101,7 +102,7 @@ module.exports = function (){
 
     this.start();
     console.log("Skippy going back");
-    for(var i = this.currentSpeed; i < MAX_SPEED; i += 2)
+    for(var i = this.currentSpeed; i < MAX_SPEED; i += 1)
     {
       setTimeout(function()
       {
@@ -130,27 +131,27 @@ module.exports = function (){
 
   this.turnLeft = function(){
     this.stop();
-    setSpeed(20);
-    this.start();
+    setSpeed(10);
     ms.setMotorDirection(motors.m1, MotorDirCCW);
     ms.setMotorDirection(motors.m2, MotorDirCCW);
     ms.setMotorDirection(motors.m3, MotorDirCW);
     ms.setMotorDirection(motors.m4, MotorDirCW);
+    this.start();
     console.log("Skippy turning Left");
   };
 
   this.turnRight = function(){
     this.stop();
-    setSpeed(20);
-    this.start();
+    setSpeed(10);
     ms.setMotorDirection(motors.m1, MotorDirCW);
     ms.setMotorDirection(motors.m2, MotorDirCW);
     ms.setMotorDirection(motors.m3, MotorDirCCW);
     ms.setMotorDirection(motors.m4, MotorDirCCW);
+    this.start();
     console.log("Skippy turning Right");
   };
 
-  /* ISR functions to increment count of voltage increse on wheen encoders */
+  /* ISR functions to start counting wheel rotation from encoders voltage changes */
   this.startRotationCount = function(){
     this.countLeft = 0;
     this.countRight = 0;
