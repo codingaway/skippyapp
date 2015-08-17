@@ -95,7 +95,7 @@ module.exports = function (){
       console.log("Enabling motors: " + motors[m]);
       ms.enableMotor(motors[m]);
     }
-    //startRotationCount();
+    startRotationCount();
   }
 
   /* Function to go backward */

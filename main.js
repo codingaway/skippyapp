@@ -3,7 +3,7 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app)
 var io = require('socket.io')(http);
-var skippy_cls = require('./skippyORG');
+var skippy_cls = require('./skippyORG3');
 console.log("Initilizing Skippy.");
 var skippy = new skippy_cls();
 //var skippy = require('./skippy');
@@ -49,11 +49,11 @@ io.on('connection', function(socket){
         skippy.stop();
     });
 
-    // setInterval(function(){
-    //   var val = skippy.getCurrentSpeed();
-    //   console.log("Current speed returned to server: " + val);
-    //   io.emit("speed", val);
-    // }, 250);
+//    setInterval(function(){
+//      var val = skippy.getCurrentSpeed();
+//      console.log("Current speed returned to server: " + val);
+//      io.emit("speed", val);
+//    }, 250);
 });
 
 // Start server

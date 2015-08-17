@@ -17,60 +17,70 @@ html
                   table
                     tr
                         td.text-right
-                            h6 Distance &nbsp;
+                            h5 Distance &nbsp;
                                 span.glyphicon.glyphicon-scale
                         td.text-left
-                            span#distance
+                            h5 &nbsp;
+                                span#distance
                     tr
                         td.text-right
-                            h6 Total distance &nbsp;
+                            h5 Total distance &nbsp;
                                 span.glyphicon.glyphicon-road
                         td.text-left
-                            span#total
+                            h5 &nbsp;
+                                span#total
                     tr
                         td.text-right
-                            h6 Speed &nbsp;
+                            h5 Speed &nbsp;
                                 span.glyphicon.glyphicon-dashboard
                         td.text-left
-                            span#speed
+                            h5 &nbsp;
+                                span#speed
                     tr
                         td.text-right
-                            h6 Charge left &nbsp;
+                            h5 Charge left &nbsp;
                                 span.glyphicon.glyphicon-hourglass
                         td.text-left
-                            span#charge
+                            h5 &nbsp;
+                                span#charge
                     tr
                         td.text-right
-                            h6 Warning &nbsp;
+                            h5 Warning &nbsp;
                                 span.glyphicon.glyphicon-bell
                         td.text-left
-                            span#warning
+                            h5 &nbsp;
+                                span#warning
               div.row
                 div.col-sm-12
                   div#msgboard
-                  
+
             div.col-sm-4
                 .mainContainer.well
-                  .buttonBlock
-                    button.btn.btn-lg.btn-primary#forward
-                        span.glyphicon.glyphicon-arrow-up
-                  .buttonBlock
-                    button.btn.btn-lg.btn-primary#left
-                        span.glyphicon.glyphicon-arrow-left
-                    |&nbsp;
-                    button.btn.btn-lg.btn-primary#right
-                        span.glyphicon.glyphicon-arrow-right
-                  .buttonBlock
-                    button.btn.btn-lg.btn-primary#backward
-                        span.glyphicon.glyphicon-arrow-down
-                  .buttonBlock
-                    button.btn.btn-lg.btn-danger#stop
-                        span.glyphicon.glyphicon-off
-                        |&nbsp; Stop
-                  .buttonBlock
-                    button.btn.btn-info#demo Run Demo
-                    |&nbsp;
-                    button.btn.btn-info#auto Auto mode
+                    div.row
+                        div.col-sm-12
+                          .buttonBlock
+                            button.btn.btn-lg.btn-primary#forward
+                                span.glyphicon.glyphicon-arrow-up
+                          .buttonBlock
+                            button.btn.btn-lg.btn-primary#left
+                                span.glyphicon.glyphicon-arrow-left
+                            |&nbsp;
+                            button.btn.btn-lg.btn-primary#right
+                                span.glyphicon.glyphicon-arrow-right
+                          .buttonBlock
+                            button.btn.btn-lg.btn-primary#backward
+                                span.glyphicon.glyphicon-arrow-down
+                          .buttonBlock
+                            button.btn.btn-lg.btn-danger#stop
+                                span.glyphicon.glyphicon-off
+                                |&nbsp; Stop
+                    div.row
+                        div.col-sm-6
+                          .buttonBlock
+                                button.btn.btn-info#demo Run Demo
+                        div.col-sm-6
+                            .buttonBlock
+                                button.btn.btn-info#auto Auto mode
             div.col-sm-4.container
                 div.row
                     div.col-sm-12
@@ -112,8 +122,8 @@ html
                 socket.emit(cmdname, cmdname);
                 return false;
             });
-            
-            $('#add').click(function(){  
+
+            $('#add').click(function(){
                 var cmd = $("#commands :selected").val();
                 console.log(cmd);
                 var val = $("#param").val();
@@ -126,12 +136,12 @@ html
                   obj[cmd] = val;
                   cmdlist.push(obj);
                   //- $("#msgboard").append(
-                  //- '<div class="well"><p>' + 
+                  //- '<div class="well"><p>' +
                   //-   JSON.stringify(cmdlist) + '</p></div>'
                   //- );
                   console.log(JSON.stringify(cmdlist));
             });
-            
+
             $("#clear").click(function(){
             	$("#cmdlist").html("");
               cmdlist = [];

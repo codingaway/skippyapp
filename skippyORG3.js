@@ -46,25 +46,23 @@ module.exports = function (){
   ms.setPWMPeriod(1000); // Set PWM period to 1KHz, Max 1.6KHz
   this.currentSpeed = 0;
   this.distance = 0;
-  var F_SPEED = 15; // Speed range (0, 100) Forward Speed
-  var B_SPEED = 10; // Speed range (0, 100) Backward Speed
-  var T_SPEED = 5; // Speed range (0, 100) Turning Speed
+  var MAX_SPEED = 30; // Speed range (0, 100)
   var motors = {
     "m1": ms_lib.AdafruitMS1438.MOTOR_M1,
     "m2": ms_lib.AdafruitMS1438.MOTOR_M2,
     "m3": ms_lib.AdafruitMS1438.MOTOR_M3,
     "m4": ms_lib.AdafruitMS1438.MOTOR_M4
   };
+
   var DIR = {"STP": 0, "FWD": 1, "BKW": 2, "LFT": 3, "RGT": 4 };
   var CURRENT_DIR = DIR.STP;
-
   /* Function to set motor speed */
   var setSpeed = function(speed){
-      for (m in motors){
-        ms.setMotorSpeed(motors[m], speed);
-      }
-      //currentSpeed = speed;
-      console.log("Speed set to" + speed);
+    for (m in motors){
+      ms.setMotorSpeed(motors[m], speed);
+    }
+    this.currentSpeed = speed;
+    console.log("Setting speed: " + this.currentSpeed);
   };
   /* Function to stop skippy */
   this.stop = function(){
@@ -77,9 +75,20 @@ module.exports = function (){
           console.log("Disabling motors: " + motors[m])
         ms.disableMotor(motors[m]);
       }
-      CURRENT_DIR == DIR.STP;
+      CURRENT_DIR = DIR.STP;
       console.log("Skippy Stopped");
   };
+  /* Function to enable motors */
+  this.start = function(){
+      for (m in motors){
+        console.log("Enabling motors: " + motors[m]);
+        ms.enableMotor(motors[m]);
+      }
+      //startRotationCount();
+  };
+
+  //this.stop(); // Disable motors when initialize MS to be safe
+
   /* Function to enable motors */
   this.start = function(){
       for (m in motors){
@@ -98,7 +107,7 @@ module.exports = function (){
           this.stop();
 
       //Set wheel rotation direction
-      skippyStart();
+      this.start();
       for (m in motors){
         ms.setMotorDirection(motors[m], MotorDirCCW);
       }
