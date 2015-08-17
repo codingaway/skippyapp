@@ -2,34 +2,138 @@ doctype
 html
   head
     title Skippy Control
+    //link(rel='stylesheet', href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css")
+    link(rel='stylesheet', href='/css/bootstrap.min.css')
+    //link(rel='stylesheet', href='/css/flat-ui.css')
     link(rel='stylesheet', href='/css/interface.css')
-    link(rel='stylesheet', href='/css/flat-ui.css')
-    script(src="/js/jquery-2.1.1.min.js")
-    script(src="/js/interface.js")
   body
-    .mainContainer
-      .title Skippy Control
-      .buttonBlock
-        button.btn.btn-block.btn-lg.btn-primary#forward() Forward
-      .buttonBlock
-        button.btn.btn-block.btn-lg.btn-primary#left Left
-        |&nbsp;
-        button.btn.btn-block.btn-lg.btn-primary#right Right
-      .buttonBlock
-        button.btn.btn-block.btn-lg.btn-primary#backward Backward
-      .buttonBlock
-        button.btn.btn-block.btn-lg.btn-danger#stop Stop
-      .buttonBlock
-        button.btn.btn-block.btn-lg.btn-info#demo Run Demo
-      .buttonBlock
-        div.display#distance Distance:
+    div.container
+      div.page-header
+        h1.text-center Skippy Dashboard
+        div.row
+            div.col-sm-4.container
+              div.row
+                div.col-sm-12.well
+                  table
+                    tr
+                        td.text-right
+                            h6 Distance &nbsp;
+                                span.glyphicon.glyphicon-scale
+                        td.text-left
+                            span#distance
+                    tr
+                        td.text-right
+                            h6 Total distance &nbsp;
+                                span.glyphicon.glyphicon-road
+                        td.text-left
+                            span#total
+                    tr
+                        td.text-right
+                            h6 Speed &nbsp;
+                                span.glyphicon.glyphicon-dashboard
+                        td.text-left
+                            span#speed
+                    tr
+                        td.text-right
+                            h6 Charge left &nbsp;
+                                span.glyphicon.glyphicon-hourglass
+                        td.text-left
+                            span#charge
+                    tr
+                        td.text-right
+                            h6 Warning &nbsp;
+                                span.glyphicon.glyphicon-bell
+                        td.text-left
+                            span#warning
+              div.row
+                div.col-sm-12
+                  div#msgboard
+                  
+            div.col-sm-4
+                .mainContainer.well
+                  .buttonBlock
+                    button.btn.btn-lg.btn-primary#forward
+                        span.glyphicon.glyphicon-arrow-up
+                  .buttonBlock
+                    button.btn.btn-lg.btn-primary#left
+                        span.glyphicon.glyphicon-arrow-left
+                    |&nbsp;
+                    button.btn.btn-lg.btn-primary#right
+                        span.glyphicon.glyphicon-arrow-right
+                  .buttonBlock
+                    button.btn.btn-lg.btn-primary#backward
+                        span.glyphicon.glyphicon-arrow-down
+                  .buttonBlock
+                    button.btn.btn-lg.btn-danger#stop
+                        span.glyphicon.glyphicon-off
+                        |&nbsp; Stop
+                  .buttonBlock
+                    button.btn.btn-info#demo Run Demo
+                    |&nbsp;
+                    button.btn.btn-info#auto Auto mode
+            div.col-sm-4.container
+                div.row
+                    div.col-sm-12
+                      div.panel.panel-success
+                        div.panel-heading
+                          |Define route
+                        div.panel-body
+                          select#commands
+                            option(value="forward") Go Forward
+                            option(value="backward") Go Backward
+                            option(value="left") Turn Left
+                            option(value="right") Turn right
+                          |&nbsp;
+                          input#param(type="number", maxlength="4", placeholder="Value", size="4")
+                          |&nbsp;
+                          button.btn.btn-sm#add(type="button") Add
+                        div.panel-footer
+                          button.btn.btn-sm.btn-info#run Run
+                          |&nbsp;
+                          button.btn.btn-sm.btn-default#clear Clear
+                div.row
+                    div.col-sm-12
+                        ul.list-group#cmdlist
+                            li.list-group-item Go forward: 20
+                            li.list-group-item Turn right: 10
+      script(src="/js/jquery-2.1.1.min.js")
       script(src="/socket.io/socket.io.js")
       script.
         $(document).ready(function(){
             var socket = io();
-            $('button').click(function(){
+            var cmdlist = [];
+            socket.on("speed", function(val){
+                console.log("new speed: " + val);
+                $("#speed").html(val);
+            });
+            $('.mainContainer button').click(function(){
                 var cmdname = $(this).attr('id');
+                console.log(cmdname);
                 socket.emit(cmdname, cmdname);
                 return false;
+            });
+            
+            $('#add').click(function(){  
+                var cmd = $("#commands :selected").val();
+                console.log(cmd);
+                var val = $("#param").val();
+              	$("#cmdlist").append(
+                  	'<li class="list-group-item">'
+                      + $("#commands :selected").html() + ": "
+                      + val + '</li>'
+                  );
+                  var obj = {};
+                  obj[cmd] = val;
+                  cmdlist.push(obj);
+                  //- $("#msgboard").append(
+                  //- '<div class="well"><p>' + 
+                  //-   JSON.stringify(cmdlist) + '</p></div>'
+                  //- );
+                  console.log(JSON.stringify(cmdlist));
+            });
+            
+            $("#clear").click(function(){
+            	$("#cmdlist").html("");
+              cmdlist = [];
             });
         });

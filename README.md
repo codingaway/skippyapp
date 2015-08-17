@@ -1,6 +1,6 @@
 Skippy Robot Control
 ====================
-The Node.js  application distributed within Intel® XDK IoT Edition under the Internet of Things  project creation option.
+The Node.js  application to control Intel Galileo Gen2 based robot
 
 Intel(R) XDK IoT Edition
 -------------------------------------------
