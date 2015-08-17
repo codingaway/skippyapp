@@ -107,12 +107,12 @@ module.exports = function (){
           this.stop();
 
       //Set wheel rotation direction
-      this.start();
+      setSpeed(B_SPEED);
       for (m in motors){
         ms.setMotorDirection(motors[m], MotorDirCCW);
       }
       CURRENT_DIR = DIR.BKW;
-      setSpeed(B_SPEED);
+      this.start();
       console.log("Skippy moving backward");
   };
 
@@ -122,12 +122,12 @@ module.exports = function (){
       if (CURRENT_DIR != DIR.STP)
         this.stop();
         //Set wheel rotation direction
-       this.start();
+       setSpeed(B_SPEED);
        for (m in motors){
           ms.setMotorDirection(motors[m], MotorDirCCW);
         }
         CURRENT_DIR = DIR.FWD;
-        setSpeed(B_SPEED);
+        this.start();
 
         console.log("Skippy moving forward");
   };
@@ -137,13 +137,13 @@ module.exports = function (){
           return;
       if (CURRENT_DIR != DIR.STP)
         this.stop();
-      this.start();
+      setSpeed(T_SPEED);
       ms.setMotorDirection(motors.m1, MotorDirCCW);
       ms.setMotorDirection(motors.m2, MotorDirCCW);
       ms.setMotorDirection(motors.m3, MotorDirCW);
       ms.setMotorDirection(motors.m4, MotorDirCW);
       CURRENT_DIR = DIR.LFT;
-      setSpeed(T_SPEED);
+      this.start();
       console.log("Skippy turning Left");
   };
 
@@ -152,13 +152,13 @@ module.exports = function (){
         return;
       if (CURRENT_DIR != DIR.STP)
       this.stop();
+      setSpeed(T_SPEED);
       ms.setMotorDirection(motors.m1, MotorDirCW);
       ms.setMotorDirection(motors.m2, MotorDirCW);
       ms.setMotorDirection(motors.m3, MotorDirCCW);
       ms.setMotorDirection(motors.m4, MotorDirCCW);
       CURRENT_DIR = DIR.RGT
       this.start();
-      setSpeed(T_SPEED);
       console.log("Skippy turning Right");
   };
 

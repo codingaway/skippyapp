@@ -1,0 +1,13 @@
+-- set MS.setPWMPeriod(50)
+
+DISABLE-- disableMotor(M3Motor)
+
+SPEED -- setMotorSpeed(M3Motor)
+
+DIRECTION -- setMotorDirection(M3motor, MotorCW)
+
+ENABLE -- enableMotor(M3motor) // GO
+
+-- setMotorDirection(M3motor, MotorCCW)
+
+-- disableMotor(M3motor) //STOP

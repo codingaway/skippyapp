@@ -52,7 +52,7 @@ var Skippy = function (){
   };
   /* Function to stop skippy */
   this.start = function(){
-    console.log("Enaabling motors: " + motors[m])
+    console.log("Enabling motors: " + motors[m])
     for (m in motors){
       ms.enableMotor(motors[m]);
     }
