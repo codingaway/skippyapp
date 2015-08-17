@@ -46,115 +46,111 @@ module.exports = function (){
   ms.setPWMPeriod(1000); // Set PWM period to 1KHz, Max 1.6KHz
   this.currentSpeed = 0;
   this.distance = 0;
-  var MAX_SPEED = 30; // Speed range (0, 100)
+  var F_SPEED = 15; // Speed range (0, 100) Forward Speed
+  var B_SPEED = 10; // Speed range (0, 100) Backward Speed
+  var T_SPEED = 5; // Speed range (0, 100) Turning Speed
   var motors = {
     "m1": ms_lib.AdafruitMS1438.MOTOR_M1,
     "m2": ms_lib.AdafruitMS1438.MOTOR_M2,
     "m3": ms_lib.AdafruitMS1438.MOTOR_M3,
     "m4": ms_lib.AdafruitMS1438.MOTOR_M4
   };
+  var DIR = {"STP": 0, "FWD": 1, "BKW": 2, "LFT": 3, "RGT": 4 };
+  var CURRENT_DIR = DIR.STP;
 
   /* Function to set motor speed */
   var setSpeed = function(speed){
-    for (m in motors){
-      ms.setMotorSpeed(motors[m], speed);
-    }
-    this.currentSpeed = speed;
-    console.log("Setting speed: " + this.currentSpeed);
+      for (m in motors){
+        ms.setMotorSpeed(motors[m], speed);
+      }
+      //currentSpeed = speed;
+      console.log("Speed set to" + speed);
   };
   /* Function to stop skippy */
   this.stop = function(){
-    console.log("Stopping: CurrentSpeed = ", this.currentSpeed);
-    for(var i = this.currentSpeed; i > 0; i -= 2)
-    {
-      console.log("Stop: i = " + i);
-      setTimeout(function(x)
+      if (CURRENT_DIR == DIR.STP)
       {
-        setSpeed(x);
-      }, 250, i);
-    }
-
-    if (this.currentSpeed > 0 || this.currentSpeed == undefined)
-    {
+          return;
+      }
       setSpeed(0); // Ensure speed set to 0
-      this.currentSpeed = 0;
-    }
-
-    for (m in motors){
-    	console.log("Disabling motors: " + motors[m])
-      ms.disableMotor(motors[m]);
-    }
+      for (m in motors){
+          console.log("Disabling motors: " + motors[m])
+        ms.disableMotor(motors[m]);
+      }
+      CURRENT_DIR == DIR.STP;
+      console.log("Skippy Stopped");
   };
-
-  this.stop(); // Disable motors when initialize MS to be safe
-
   /* Function to enable motors */
   this.start = function(){
-    for (m in motors){
-      console.log("Enabling motors: " + motors[m]);
-      ms.enableMotor(motors[m]);
-    }
-    this.stopRotationCount();
+      for (m in motors){
+        console.log("Enabling motors: " + motors[m]);
+        ms.enableMotor(motors[m]);
+      }
+      //startRotationCount();
   };
 
   /* Function to go backward */
   this.goBackward = function(){
-    this.stop();
-    for (m in motors){
-      ms.setMotorDirection(motors[m], MotorDirCCW);
-    }
+      if(CURRENT_DIR == DIR.BKW) // If already moving backward; just return
+        return;
 
-    this.start();
-    console.log("Skippy going back");
-    for(var i = this.currentSpeed; i < MAX_SPEED; i += 1)
-    {
-      setTimeout(function(x)
-      {
-        setSpeed(x);
-      }, 500, i);
-    }
+      if (CURRENT_DIR != DIR.STP) //Stop first if it's moving
+          this.stop();
+
+      //Set wheel rotation direction
+      skippyStart();
+      for (m in motors){
+        ms.setMotorDirection(motors[m], MotorDirCCW);
+      }
+      CURRENT_DIR = DIR.BKW;
+      setSpeed(B_SPEED);
+      console.log("Skippy moving backward");
   };
 
   this.goForward = function(){
-    this.stop();
-    for (m in motors){
-      ms.setMotorDirection(motors[m], MotorDirCW);
-    }
+      if(CURRENT_DIR == DIR.FWD)
+        return;
+      if (CURRENT_DIR != DIR.STP)
+        this.stop();
+        //Set wheel rotation direction
+       this.start();
+       for (m in motors){
+          ms.setMotorDirection(motors[m], MotorDirCCW);
+        }
+        CURRENT_DIR = DIR.FWD;
+        setSpeed(B_SPEED);
 
-    this.start();
-    console.log("Skippy going forward");
-    // Increase speed incrementally
-    console.log("Before incresing speed: " + this.currentSpeed);
-  	for(var i = this.currentSpeed; i < MAX_SPEED; i += 2)
-    {
-      console.log("Forward Currnet Speed: " + this.currentSpeed);
-      setTimeout(function(x)
-      {
-        setSpeed(x);
-      }, 1000, i);
-    }
+        console.log("Skippy moving forward");
   };
 
   this.turnLeft = function(){
-    this.stop();
-    setSpeed(10);
-    ms.setMotorDirection(motors.m1, MotorDirCCW);
-    ms.setMotorDirection(motors.m2, MotorDirCCW);
-    ms.setMotorDirection(motors.m3, MotorDirCW);
-    ms.setMotorDirection(motors.m4, MotorDirCW);
-    this.start();
-    console.log("Skippy turning Left");
+      if(CURRENT_DIR == DIR.LFT)
+          return;
+      if (CURRENT_DIR != DIR.STP)
+        this.stop();
+      this.start();
+      ms.setMotorDirection(motors.m1, MotorDirCCW);
+      ms.setMotorDirection(motors.m2, MotorDirCCW);
+      ms.setMotorDirection(motors.m3, MotorDirCW);
+      ms.setMotorDirection(motors.m4, MotorDirCW);
+      CURRENT_DIR = DIR.LFT;
+      setSpeed(T_SPEED);
+      console.log("Skippy turning Left");
   };
 
   this.turnRight = function(){
-    this.stop();
-    setSpeed(10);
-    ms.setMotorDirection(motors.m1, MotorDirCW);
-    ms.setMotorDirection(motors.m2, MotorDirCW);
-    ms.setMotorDirection(motors.m3, MotorDirCCW);
-    ms.setMotorDirection(motors.m4, MotorDirCCW);
-    this.start();
-    console.log("Skippy turning Right");
+      if(CURRENT_DIR == DIR.RGT)
+        return;
+      if (CURRENT_DIR != DIR.STP)
+      this.stop();
+      ms.setMotorDirection(motors.m1, MotorDirCW);
+      ms.setMotorDirection(motors.m2, MotorDirCW);
+      ms.setMotorDirection(motors.m3, MotorDirCCW);
+      ms.setMotorDirection(motors.m4, MotorDirCCW);
+      CURRENT_DIR = DIR.RGT
+      this.start();
+      setSpeed(T_SPEED);
+      console.log("Skippy turning Right");
   };
 
   /* ISR functions to start counting wheel rotation from encoders voltage changes */
