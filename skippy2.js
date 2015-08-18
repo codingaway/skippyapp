@@ -8,8 +8,7 @@ var MotorDirCCW = ms_lib.AdafruitMS1438.DIR_CCW;
 /* Encoders reader */
 var mraa = require('mraa');
 /* Distance sensors */
-var IRProximity = require('jsupm_gp2y0a')
-//var events = require('events');
+var IRProximity = require('jsupm_gp2y0a');
 
 /*
 DFRobot 4WD Wheel radius -- Distance calcualtion
@@ -45,7 +44,7 @@ module.exports = function (){
   ms.setPWMPeriod(1000); // Set PWM period to 1KHz, Max 1.6KHz
   var currentSpeed = 0;
   var distance = 0;
-  var MAX_SPEED = 30; // Speed range (0, 100)
+  var MAX_SPEED = 25; // Speed range (0, 100)
   var motors = {
     "m1": ms_lib.AdafruitMS1438.MOTOR_M1,
     "m2": ms_lib.AdafruitMS1438.MOTOR_M2,
@@ -60,6 +59,29 @@ module.exports = function (){
   ms.disableMotor(motors.m3);
   ms.disableMotor(motors.m4);
 
+  /* ISR functions to start counting wheel rotation from encoders voltage changes */
+  var startRotationCount = function(){
+    countLeft = 0;
+    countRight = 0;
+
+    leftEnc.isr(mraa.EDGE_RISING, function(){
+      countLeft++;
+    });
+
+    rightEnc.isr(mraa.EDGE_RISING, function(){
+      countRight++;
+    });
+  };
+
+  // Stop wheel rotation count
+  var stopRotationCount = function(){
+    leftEnc.isrExit();
+    rightEnc.isrExit();
+    countLeft = 0;
+    countRight = 0
+  };
+
+
   /* Function to set motor speed */
   function setSpeed(speed){
     for (m in motors){
@@ -71,46 +93,51 @@ module.exports = function (){
 
   /* Function to stop skippy */
   function stopSkippy(callback){
-    console.log("Invoking stop..");
-    console.log("Current DIR at stop: " + CURRENT_DIR);
-    if (CURRENT_DIR == DIR.STP)
-    {
-      console.log("Calling callback outside timer");
+    console.log("Stopping...");
+    var countEnds = 0;
+    var countStarts = countRight; // need to find stopping distance; save encoder currnet count
+    if (CURRENT_DIR == DIR.STP){
       if (callback) {
-        console.log("Callback True");
-        callback();
-        return;
+        return callback();
       }
       else {
         return;
       }
     }
-
-     setTimeout(function () {    //  call a 3s setTimeout when the loop is called
-        console.log("Timer setting speed:" + currentSpeed);
-        currentSpeed--;
-        if (currentSpeed > 0) {            //  if the counter < 10, call the loop function
-           setSpeed(currentSpeed);
-           stopSkippy();             // Recursive call to start another timer
+    //Self calling recursive function to kick off timers to reduce speed
+    (function setZeroSpeed(){
+      setTimeout(function(){
+        if(currentSpeed > 0)
+        {
+          setSpeed(--currentSpeed);
+          setZeroSpeed();
         }
-        else {
-          CURRENT_DIR = DIR.STP
+        else if(callback)
+        {
+          countEnds = countRight; // save encoder count before stopping them
+          stopRotationCount(); //S top encoder counter
+          console.log("Stopping distance: " + (countEnds - countStarts));
+
+          CURRENT_DIR = DIR.STP; //Set stop flag
+          //Disbale motors
           for (m in motors){
-          	console.log("Disabling motors: " + motors[m])
+            console.log("Disabling motors: " + motors[m])
             ms.disableMotor(motors[m]);
           }
-          console.log("Calling callback function");
-          if (callback){
-            console.log("Callback True");
-            callback();
-            return;
-          }
-          else {
-            return;
-          }
+          return callback();
         }
-     }, 200)
-  }
+        else
+        {
+          countEnds = countRight; // save encoder count before stopping them
+          stopRotationCount(); //S top encoder counter
+          console.log("Stopping distance: " + (countEnds - countStarts));
+
+          CURRENT_DIR = DIR.STP; //Set stop flag
+          return;
+        }
+      }, 200); //200 ms delay
+    })();
+}
 
   /* Function to enable motors */
   function start(){
@@ -118,7 +145,8 @@ module.exports = function (){
       console.log("Enabling motors: " + motors[m]);
       ms.enableMotor(motors[m]);
     }
-    //startRotationCount();
+    //Start encoder counters
+    startRotationCount();
   }
 
   /* Function to go backward */
@@ -131,6 +159,7 @@ module.exports = function (){
       for (m in motors){
         ms.setMotorDirection(motors[m], MotorDirCCW);
       }
+      setSpeed(1);
       start();
       console.log("Skippy going back");
       CURRENT_DIR = DIR.BKW;
@@ -154,6 +183,7 @@ module.exports = function (){
       for (m in motors){
         ms.setMotorDirection(motors[m], MotorDirCW);
       }
+      setSpeed(1);
       start();
       console.log("Skippy going forward");
       CURRENT_DIR = DIR.FWD;
@@ -169,63 +199,47 @@ module.exports = function (){
     });
   };
 
-
   this.turnLeft = function(){
-    if(CURRENT_DIR == DIR.LFT)
-        return;
-    stopSkippy();
-    setSpeed(5);
-    ms.setMotorDirection(motors.m1, MotorDirCCW);
-    ms.setMotorDirection(motors.m2, MotorDirCCW);
-    ms.setMotorDirection(motors.m3, MotorDirCW);
-    ms.setMotorDirection(motors.m4, MotorDirCW);
-    CURRENT_DIR = DIR.LFT;
-    start();
-    console.log("Skippy turning Left");
+    if(CURRENT_DIR == DIR.LFT){
+      return;
+    }
+
+    stopSkippy(function(){
+      setSpeed(5);
+      ms.setMotorDirection(motors.m1, MotorDirCCW);
+      ms.setMotorDirection(motors.m2, MotorDirCCW);
+      ms.setMotorDirection(motors.m3, MotorDirCW);
+      ms.setMotorDirection(motors.m4, MotorDirCW);
+      CURRENT_DIR = DIR.LFT;
+      start();
+      console.log("Skippy turning Left");
+    });
   };
 
   this.turnRight = function(){
-    if(CURRENT_DIR == DIR.RGT)
-      return;
-    stopSkippy();
-    //Wait for fully stopped
-    while(CURRENT_DIR != DIR.STP)
-    {}
-    setSpeed(5);
-    ms.setMotorDirection(motors.m1, MotorDirCW);
-    ms.setMotorDirection(motors.m2, MotorDirCW);
-    ms.setMotorDirection(motors.m3, MotorDirCCW);
-    ms.setMotorDirection(motors.m4, MotorDirCCW);
-    CURRENT_DIR = DIR.RGT
-    start();
-    console.log("Skippy turning Right");
-  };
+    if(CURRENT_DIR == DIR.RGT){
+        return;
+    }
 
-  /* ISR functions to start counting wheel rotation from encoders voltage changes */
-  var startRotationCount = function(){
-    countLeft = 0;
-    countRight = 0;
-
-    leftEnc.isr(mraa.EDGE_RISING, function(){
-      countLeft++;
-    });
-
-    rightEnc.isr(mraa.EDGE_RISING, function(){
-      countRight++;
+    stopSkippy(function(){
+      setSpeed(5);
+      ms.setMotorDirection(motors.m1, MotorDirCW);
+      ms.setMotorDirection(motors.m2, MotorDirCW);
+      ms.setMotorDirection(motors.m3, MotorDirCCW);
+      ms.setMotorDirection(motors.m4, MotorDirCCW);
+      CURRENT_DIR = DIR.RGT
+      start();
+      console.log("Skippy turning Right");
     });
   };
 
-  // Stop wheel rotation count
-  var stopRotationCount = function(){
-    leftEnc.isrExit();
-    rightEnc.isrExit();
-    countLeft = 0;
-    countRight = 0
-  };
-  this.getCurrentSpeed = function(){
-    console.log("Current speed at Class" + currentSpeed);
+  this.getCurrentSpeed = function() {
     return currentSpeed;
   };
-  this.stop = stopSkippy;
+
+  this.getDistance = function(){
+    return max(countRight, countLeft);
+  };
+  this.stopSkippy = stopSkippy;
   this.start = start;
 };
