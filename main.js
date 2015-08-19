@@ -3,7 +3,7 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app)
 var io = require('socket.io')(http);
-var skippy_cls = require('./skippy2');
+var skippy_cls = require('./skippy3');
 console.log("Initilizing Skippy.");
 var skippy = new skippy_cls();
 //var skippy = require('./skippy');
@@ -27,6 +27,7 @@ app.get('/', function(req, res){
 // Listen socket events
 io.on('connection', function(socket){
     console.log("A user is connected");
+
     socket.on('forward', function(){
         console.log("CMD: Forward");
         skippy.goForward();
@@ -48,6 +49,11 @@ io.on('connection', function(socket){
         console.log("CMD: Stop");
         skippy.stop();
     });
+    // socket.on('runList', function(cmdList){
+    //     console.log("CMD: Recieved cmdList");
+    //     console.log(JSON.stringify(cmdlist));
+    // });
+
 
 //    setInterval(function(){
 //      var val = skippy.getCurrentSpeed();
@@ -62,13 +68,13 @@ http.listen(port, function(){
 });
 
 //Function to run a list of skippy moves given as name:value
-var runCmdList(args){
-    if(args && args.length > 0){
-      for(var i = 0; i < args.length; i++){
-        cmdObj = args[i];
-        for(cmd in cmdObj){
-          skippy[cmd](cmdObj[cmd]); //Call Skippy command
-        }
-      }
-    }
-}
+// var runCmdList = function(args){
+//     if(args && args.length > 0){
+//       for(var i = 0; i < args.length; i++){
+//         cmdObj = args[i];
+//         for(cmd in cmdObj){
+//           skippy[cmd](cmdObj[cmd]); //Call Skippy command
+//         }
+//       }
+//     }
+// };

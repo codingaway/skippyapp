@@ -104,8 +104,6 @@ html
                 div.row
                     div.col-sm-12
                         ul.list-group#cmdlist
-                            li.list-group-item Go forward: 20
-                            li.list-group-item Turn right: 10
       script(src="/js/jquery-2.1.1.min.js")
       script(src="/socket.io/socket.io.js")
       script.
@@ -139,11 +137,22 @@ html
                   //- '<div class="well"><p>' +
                   //-   JSON.stringify(cmdlist) + '</p></div>'
                   //- );
-                  console.log(JSON.stringify(cmdlist));
+                  //console.log(JSON.stringify(cmdlist));
             });
 
             $("#clear").click(function(){
             	$("#cmdlist").html("");
               cmdlist = [];
+            });
+
+            $("#run").click(function(){
+                console.log("Run button clicked!");
+                console.log(JSON.stringify(cmdlist));
+                if(cmdlist && cmdlist.length > 0)
+                {
+                    //console.log(JSON.stringify(cmdlist));
+                    socket.emit("runList", cmdlist);
+                }
+                return false;
             });
         });
